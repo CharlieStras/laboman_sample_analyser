@@ -1,0 +1,45 @@
+version: 1.0.{build}
+
+skip_non_tags: true
+
+image: Visual Studio 2015
+
+cache:
+  - node_modules
+
+environment:
+  nodejs_version: "10"
+  my_secret:
+    secure: ++gLrdKGgw7aoUMAzxc+6w==
+  my_salt:
+    secure: 72eUNv96mrJv6j/HZtieluZiwyZGC7Tg/pD/RIA0hPmXwrF1ioAg7UGep7XWnMJVacnrJG2BmUqj7oC0G//Qgw==
+
+install:
+  - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
+  - cmd: appveyor-tools\secure-file -decrypt .\src\secret.js.enc -secret %my_secret% -salt %my_salt%
+  - sh: ./appveyor-tools/secure-file -decrypt ./src/secret.js.enc -secret $my_secret -salt $my_salt
+  - ps: Install-Product node $env:nodejs_version
+  - npm install
+
+build_script:
+  - npm run build-package-32
+  - npm run build-package-64
+
+test: off
+
+artifacts:
+  - path: out
+    name: lsa
+
+deploy:
+  release: lsa-v$(appveyor_build_version)
+  description: "Laboman Sample Analyser"
+  provider: GitHub
+  auth_token:
+    secure: xXfIO2UEZQCgkjhJSQUFX5HQHY34H/z8pJeUHsByYHUJs2Ev5g3OTXrWvbtkrP8h
+  artifact: lsa
+  draft: true
+  prerelease: false
+  on:
+    branch: master
+    APPVEYOR_REPO_TAG: true
