@@ -22,14 +22,15 @@ install:
   - npm install
 
 build_script:
-  - npm run build-package-32
-  - npm run build-package-64
+  - npm run package
 
 test: off
 
 artifacts:
-  - path: out
-    name: lsa
+  - path: dist\LSA-win32-ia32
+    name: lsa-win32
+  - path: dist\LSA-win32-x64
+    name: lsa-win64
 
 deploy:
   release: lsa-v$(appveyor_build_version)
@@ -37,9 +38,6 @@ deploy:
   provider: GitHub
   auth_token:
     secure: xXfIO2UEZQCgkjhJSQUFX5HQHY34H/z8pJeUHsByYHUJs2Ev5g3OTXrWvbtkrP8h
-  artifact: lsa
+  artifact: lsa-win32,lsa-win64
   draft: true
-  prerelease: false
-  on:
-    branch: master
-    APPVEYOR_REPO_TAG: true
+  force_update: true

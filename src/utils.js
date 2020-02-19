@@ -150,8 +150,10 @@ function getStatus(rackID, tubePosition) {
   var status = "NORMAL";
 
   if (
-    (baseState.rackID && rackID != baseState.rackID) ||
-    (baseState.tubePosition && tubePosition != baseState.tubePosition)
+    (baseState.rackID && rackID && rackID != baseState.rackID) ||
+    (baseState.tubePosition &&
+      tubePosition &&
+      tubePosition != baseState.tubePosition)
   ) {
     status = "DANGER";
   }

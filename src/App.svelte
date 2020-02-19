@@ -1,6 +1,4 @@
 <script>
-  import { onMount } from "svelte";
-
   const { remote } = require("electron");
   const conn = remote.require("./main.js").conn;
 
