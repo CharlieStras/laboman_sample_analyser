@@ -56,55 +56,145 @@
     bind:this="{inputElement}"
     on:keydown="{handleKeydown}"
   />
-  <div class="search" in:fly={{duration: 1000, x: 200}}></div>
+  <div class="search" in:fly={{duration: 500, x: 200}}></div>
   {/if}
 </div>
 
 <style>
   .container {
-    width: 100%;
     position: relative;
-    transform: scale(0.6);
+    width: 60%;
   }
 
   .container.searched {
     position: fixed;
-    right: 20px;
-    transform: none;
+    right: 1.25rem;
     z-index: 2;
   }
 
   input {
-    margin: 0;
-    padding: 35px;
+    padding: 1.3125rem;
     width: 100%;
-    height: 166px;
+    height: 6.225rem;
     color: #fff;
     border: 0;
-    font-size: 60px;
+    font-size: 2.25rem;
     line-height: 1;
     background-color: #77ca7f;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px #77cf7f, 0 0 0 20px #ffffff;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.375rem 1.5rem #77cf7f, 0 0 0 0.75rem #ffffff;
+  }
+
+  .button-container {
+    position: absolute;
+    top: 1.3125rem;
+    right: 1.3125rem;
+  }
+
+  button {
+    position: relative;
+    display: block;
+    width: 3.15rem;
+    height: 3.6rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: transparent;
+  }
+
+  .circle {
+    position: relative;
+    top: -0.3rem;
+    left: 0;
+    width: 2.625rem;
+    height: 2.625rem;
+    margin-top: 0;
+    border-width: 0.5625rem;
+    border: 0.5625rem solid #fff;
+    background-color: transparent;
+    border-radius: 50%;
+    transition: 0.5s ease all;
+  }
+
+  button span {
+    position: absolute;
+    top: 2.55rem;
+    left: 1.6125rem;
+    display: block;
+    width: 1.6875rem;
+    height: 0.5625rem;
+    background-color: transparent;
+    border-radius: 0.375rem;
+    transform: rotateZ(52deg);
+    transition: 0.5s ease all;
+  }
+
+  button span:before,
+  button span:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 1.6875rem;
+    height: 0.5625rem;
+    background-color: #fff;
+    border-radius: 0.375rem;
+    transform: rotateZ(0);
+    transition: 0.5s ease all;
+  }
+
+  .button-container:hover .circle {
+    top: -0.0375rem;
+    width: 2.5125rem;
+    height: 0.5625rem;
+    border-width: 0;
+    background-color: #fff;
+    border-radius: 0.75rem;
+  }
+
+  .button-container:hover span {
+    top: 50%;
+    left: 2.1rem;
+    width: 0.9375rem;
+    margin-top: -0.3375rem;
+    transform: rotateZ(0);
+  }
+
+  .button-container:hover span:before {
+    bottom: 0.4125rem;
+    transform: rotateZ(52deg);
+  }
+
+  .button-container:hover span:after {
+    bottom: -0.4125rem;
+    transform: rotateZ(-52deg);
+  }
+
+  .button-container:hover span:before,
+  .button-container:hover span:after {
+    right: -0.225rem;
+    width: 1.5rem;
+    background-color: #fff;
   }
 
   input.searched {
     position: absolute;
-    top: 15px;
+    top: 0.9375rem;
     right: 0;
-    width: 50px;
-    height: 50px;
-    border: none;
-    text-shadow: 0 0 10px #77ca7f;
-    padding: 0 80px 0 20px;
-    border-radius: 30px;
-    box-shadow: 0 0 25px 0 #77ca7f, 0 20px 25px 0 rgba(0, 0, 0, 0.2);
+    width: 3.125rem;
+    height: 3.125rem;
+    border: 0;
+    text-shadow: 0 0 0.625rem #77ca7f;
+    padding: 0 5rem 0 1.25rem;
+    border-radius: 1.875rem;
+    box-shadow: 0 0 1.5625rem 0 #77ca7f, 0 1.25rem 1.5625rem 0 rgba(0, 0, 0, 0.2);
     transition: all 1s;
     opacity: 0;
     z-index: 4;
     font-size: 1rem;
     font-weight: bolder;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1rem;
   }
 
   input.searched:hover {
@@ -112,7 +202,7 @@
   }
 
   input.searched:focus {
-    width: 300px;
+    width: 18.75rem;
     opacity: 1;
     cursor: text;
   }
@@ -125,99 +215,6 @@
     color: white;
     opacity: 0.5;
     font-weight: bolder;
-  }
-
-  .button-container {
-    position: absolute;
-    top: 35px;
-    right: 35px;
-  }
-
-  button {
-    position: relative;
-    display: block;
-    width: 84px;
-    height: 96px;
-    cursor: pointer;
-    padding: 0;
-    margin: 0;
-    border: 0;
-    background-color: transparent;
-  }
-
-  .circle {
-    position: relative;
-    top: -8px;
-    left: 0;
-    width: 70px;
-    height: 70px;
-    margin-top: 0;
-    border-width: 15px;
-    border: 15px solid #fff;
-    background-color: transparent;
-    border-radius: 50%;
-    transition: 0.5s ease all;
-  }
-
-  button span {
-    position: absolute;
-    top: 68px;
-    left: 43px;
-    display: block;
-    width: 45px;
-    height: 15px;
-    background-color: transparent;
-    border-radius: 10px;
-    transform: rotateZ(52deg);
-    transition: 0.5s ease all;
-  }
-
-  button span:before,
-  button span:after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 45px;
-    height: 15px;
-    background-color: #fff;
-    border-radius: 10px;
-    transform: rotateZ(0);
-    transition: 0.5s ease all;
-  }
-
-  .button-container:hover .circle {
-    top: -1px;
-    width: 67px;
-    height: 15px;
-    border-width: 0;
-    background-color: #fff;
-    border-radius: 20px;
-  }
-
-  .button-container:hover span {
-    top: 50%;
-    left: 56px;
-    width: 25px;
-    margin-top: -9px;
-    transform: rotateZ(0);
-  }
-
-  .button-container:hover span:before {
-    bottom: 11px;
-    transform: rotateZ(52deg);
-  }
-
-  .button-container:hover span:after {
-    bottom: -11px;
-    transform: rotateZ(-52deg);
-  }
-
-  .button-container:hover span:before,
-  .button-container:hover span:after {
-    right: -6px;
-    width: 40px;
-    background-color: #fff;
   }
 
   .search {

@@ -4,8 +4,8 @@
   export var iconName;
   export var iconType;
   export var status;
-  export var hide;
-  export var bounceIn;
+  export var hidden;
+  export var bounce;
 
   $: fillColor = status == "WARNING" ? "#212529" : "#fff";
 </script>
@@ -13,38 +13,36 @@
 <div class="icon" data-status="{status}">
   <Icon
     fill="{fillColor}"
-    {hide}
-    {bounceIn}
+    {hidden}
+    {bounce}
     name="{iconName}"
     type="{iconType}"
   ></Icon>
 </div>
 
 <style>
-  div {
+  .icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 1.2rem;
     border-radius: 50%;
     box-shadow: 0 0 0 4px hsl(0, 0%, 100%), inset 0 2px 0 rgba(0, 0, 0, 0.08),
       0 3px 0 4px rgba(0, 0, 0, 0.05);
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 40rem) {
     .icon {
-      width: 60px;
-      height: 60px;
-      order: 1;
-      margin-left: 25px;
+      width: 3.75rem;
+      height: 3.75rem;
       will-change: transform;
     }
   }
 
   .icon[data-status="NORMAL"] {
-    background-color: var(--cd-color-4);
+    background-color: #75cd65;
   }
 
   .icon[data-status="WARNING"] {

@@ -4,10 +4,11 @@
 
   import SearchBar from "./SearchBar.svelte";
   import SampleTable from "./SampleTable.svelte";
+  import SampleInfo from "./SampleInfo.svelte";
   import VerticalTimeline from "./VerticalTimeline.svelte";
 
   import { parseSampleProcess } from "./utils";
-  import { processes, needInit, searched, samples } from "./store.js";
+  import { processes, searched, samples, sampleInfo } from "./store.js";
 
   import DATA from "./data.js";
 
@@ -54,7 +55,9 @@
         handleSearchProcess
       );
     } else {
-      handleSearchProcess(null, DATA);
+      if (DATA[sampleID]) {
+        handleSearchProcess(null, DATA[sampleID]);
+      }
     }
   }
 
@@ -62,8 +65,12 @@
     if (err) {
       console.error(err);
     } else {
-      processes.set(parseSampleProcess(result));
-      needInit.set(true);
+      const {
+        processes: parsedProcesses,
+        sampleInfo: parsedSampleInfo
+      } = parseSampleProcess(result);
+      processes.set(parsedProcesses);
+      sampleInfo.set(parsedSampleInfo);
     }
   }
 </script>
@@ -75,6 +82,7 @@
   <SearchBar {searchSample}></SearchBar>
   <SampleTable {searchSampleProcess}></SampleTable>
   {#if $processes.length > 0}
+  <SampleInfo></SampleInfo>
   <VerticalTimeline processes="{$processes}"></VerticalTimeline>
   {/if}
 </main>
@@ -88,7 +96,7 @@
     height: 100%;
     justify-content: center;
     align-items: center;
-    padding: 1em;
+    padding: 1rem;
   }
 
   main.searched {
@@ -97,9 +105,9 @@
   }
 
   h1 {
-    font-size: 3em;
+    font-size: 3rem;
     color: #fff;
-    margin-top: -60px;
+    margin-top: -3.75rem;
     text-align: center;
   }
 </style>

@@ -1,20 +1,18 @@
 <script>
   export var name;
   export var fill;
-  export var hide;
-  export var bounceIn;
+  export var hidden;
+  export var bounce;
   export var type;
 </script>
 
 <svg
   data-name="icon"
   xmlns="http://www.w3.org/2000/svg"
-  width="45px"
-  height="45px"
   {fill}
   viewBox="0 0 32 32"
-  class:hidden="{hide}"
-  class:bounce-in="{bounceIn}"
+  class:hidden
+  class:bounce
 >
   {#if name == "LIS"}
   <g class="icon-lis">
@@ -105,3 +103,33 @@
   />
   {/if}
 </svg>
+
+<style>
+  svg {
+    width: 2.8125rem;
+    height: 2.8125rem;
+  }
+  @media (min-width: 40rem) {
+    .hidden {
+      visibility: hidden;
+    }
+
+    .bounce {
+      animation: bounce 0.6s;
+    }
+  }
+
+  @keyframes bounce {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>

@@ -4,11 +4,11 @@
   "productName": "LSA",
   "main": "./src/main.js",
   "scripts": {
+    "start": "sirv public",
     "rollup-build": "rollup -c",
     "rollup-dev": "rollup -c -w",
     "electron": "electron .",
     "electron-dev": "NODE_ENV=development electron .",
-    "start": "run-s rollup-build electron",
     "dev": "run-p rollup-dev electron-dev",
     "rebuild-32": "electron-rebuild -f -w sqlanywhere --arch=ia32",
     "rebuild-64": "electron-rebuild -f -w sqlanywhere --arch=x64",
