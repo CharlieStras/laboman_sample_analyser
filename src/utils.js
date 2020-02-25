@@ -30,6 +30,7 @@ function parseNode(node, index, nodes) {
   record.archivingInstruction = node.area;
   record.archivingResult = node.store;
   record.lisNO = node.lisno;
+  record.archivingReason = node.sort_reason;
   record.index = index;
 
   if (record.sampleID && !sampleInfo.sampleID) {
@@ -145,6 +146,7 @@ function constructPad(record, nodeCount) {
     sortingIndex,
     trayNO,
     positionInRack,
+    archivingReason,
     index
   } = record;
 
@@ -221,7 +223,8 @@ function constructPad(record, nodeCount) {
     case "R":
       if (recordInstrument.includes("CT90")) {
         title = `接收到${recordInstrument}发送的标本归档结果`;
-        content = `归档区域: ${sortingIndex}，托盘序号: ${trayNO}，位置: ${positionInRack}`;
+        content = `归档区域: ${sortingIndex}，托盘序号: ${trayNO}，位置: ${positionInRack}<br>`;
+        content += `归档原因: ${archivingReason}`;
       } else {
         title = `接收到${recordInstrument}发送的结果`;
       }

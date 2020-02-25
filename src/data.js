@@ -264,7 +264,8 @@ const DATA = {
       item: "",
       area: "",
       store: "STORE-F^1^5^125^000033^5^1^OK",
-      lisno: ""
+      lisno: "",
+      sort_reason: "默认区域"
     }
   ],
   2: [
