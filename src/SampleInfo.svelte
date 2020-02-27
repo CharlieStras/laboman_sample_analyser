@@ -48,7 +48,7 @@
   }
 
   .error {
-    color: #dc3545;
+    color: var(--danger-color);
     font-weight: bold;
   }
 </style>

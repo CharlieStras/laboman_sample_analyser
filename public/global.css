@@ -1,3 +1,9 @@
+:root {
+  --primary-bg-color: #6db96f;
+  --secondary-bg-color: #6cbdea;
+  --danger-color: #dc3545;
+}
+
 *,
 *::after,
 *::before {
@@ -23,9 +29,13 @@ body {
   box-sizing: border-box;
   font-family: Tahoma, Arial, Helvetica, "Microsoft YaHei New",
     "Microsoft Yahei", "微软雅黑", 宋体, SimSun, STXihei, "华文细黑", sans-serif;
-  background: linear-gradient(to right, #6cbdea, #6db96f);
+  background: linear-gradient(
+    to right,
+    var(--secondary-bg-color),
+    var(--primary-bg-color)
+  );
 }
 
 strong.error {
-  color: #dc3545;
+  color: var(--danger-color);
 }

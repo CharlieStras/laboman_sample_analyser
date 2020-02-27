@@ -1,13 +1,16 @@
-var sampleInfo = { errors: [] };
+var sampleInfo = {};
 
 const LIS_NO_ORDER = "未收到LIS指令";
 const LIS_ORDER_LATE = "LIS指令时间晚于标本上机时间";
+const LIS_NO_INFO = "未收到LIS发送的病人信息";
+const LIS_INFO_LATE = "LIS发送的病人信息晚于标本上机时间";
+const LIS_INFO_NO_NUMBER = "LIS发送的病人信息中不包含短号";
 const LIS_ORDER_FORMAT_ERROR = "LIS指令格式有误";
 const CT_NO_BT = "标本未经过BT或TS-10";
 const LAB_ORDER_ERROR = "Laboman所下指令与LIS指令不符";
 
 function parseSampleProcess(data) {
-  sampleInfo = { errors: [] };
+  sampleInfo = { lisOrder: "", instrLogs: [], errors: [] };
 
   var processes = data.map(parseNode);
 
@@ -26,7 +29,7 @@ function parseNode(node, index, nodes) {
   record.recordType = node.record_type;
   record.rackID = node.rack;
   record.tubePosition = node.tube;
-  record.order = node.item;
+  record.order = node.item.toUpperCase();
   record.archivingInstruction = node.area;
   record.archivingResult = node.store;
   record.lisNO = node.lisno;
@@ -154,11 +157,9 @@ function constructPad(record, nodeCount) {
     case "0":
       title = `接收到LIS发送的指令`;
       {
-        const regex = RegExp(/^\+?([a-zA-Z]+)?(\+[a-zA-Z]+)*\+?$/);
+        const regex = RegExp(/^\+?([0-9a-zA-Z]+)?(\+[0-9a-zA-Z]+)*\+?$/);
         if (!regex.test(order)) {
-          const errorMessage = LIS_ORDER_FORMAT_ERROR;
-          sampleInfo.errors.indexOf(errorMessage) == -1 &&
-            sampleInfo.errors.push(errorMessage);
+          addError(LIS_ORDER_FORMAT_ERROR);
           content = `指令内容: <strong class="error">${order}</strong>`;
         } else {
           content = `指令内容: ${order}`;
@@ -167,7 +168,13 @@ function constructPad(record, nodeCount) {
       break;
     case "1":
       title = `接收到LIS发送的病人信息`;
-      content = `LIS短号: ${lisNO}`;
+      if (lisNO) {
+        content = `LIS短号: ${lisNO}`;
+      } else {
+        addError(LIS_INFO_NO_NUMBER);
+        content = `<strong class="error">无LIS短号</strong>`;
+      }
+      sampleInfo.hasLISInfo = true;
       break;
     case "2":
       title = `生成标本结果文件(*.cdf)供LIS解析`;
@@ -176,49 +183,72 @@ function constructPad(record, nodeCount) {
       title = `接收到${recordInstrument}${
         serialNO ? "(" + serialNO + ")" : ""
       }发送的指令询问`;
+
       if (
         recordInstrument == "CT90" &&
         (recordPosition == "SI" || recordPosition == "B")
       ) {
         sampleInfo.passedSIOrBT = true;
         if (!sampleInfo.lisOrder) {
-          const errorMessage = LIS_ORDER_LATE;
-          sampleInfo.errors.indexOf(errorMessage) == -1 &&
-            sampleInfo.errors.push(errorMessage);
+          addError(LIS_ORDER_LATE);
         }
       }
+
+      if (recordInstrument != "CT90" && !sampleInfo.hasLISInfo) {
+        addError(LIS_INFO_LATE);
+      }
+
+      addInstrLog(recordInstrument, recordPosition);
+
       break;
     case "O":
       if (archivingInstruction) {
         title = `发送归档指令至${recordInstrument}`;
         content = `归档区域: ${archivingInstruction}`;
-      } else if (order) {
+      } else {
         title = `发送指令至${recordInstrument}`;
 
-        const parameters = order.split("+");
-        const lisParameters = sampleInfo.lisOrder
-          ? sampleInfo.lisOrder.split("+")
-          : [];
-        if (
-          lisParameters.length > 0 &&
-          recordInstrument != "SP-10" &&
-          !sampleInfo.XNOrdered &&
-          !parameters.every(parameter => lisParameters.includes(parameter))
-        ) {
-          const errorMessage = LAB_ORDER_ERROR;
-          sampleInfo.errors.indexOf(errorMessage) == -1 &&
-            sampleInfo.errors.push(errorMessage);
-          content = `指令内容: <strong class="error">${order}</strong>`;
+        var orderMatched = true;
+
+        if (sampleInfo.lisOrder) {
+          orderMatched = compareOrders(
+            recordInstrument,
+            recordPosition,
+            order,
+            sampleInfo.lisOrder
+          );
+
+          if (!orderMatched) {
+            addError(LAB_ORDER_ERROR);
+          }
+        }
+
+        if (order) {
+          if (!orderMatched) {
+            content = `指令内容: <strong class="error">${order}</strong>`;
+          } else {
+            content = `指令内容: ${order}`;
+          }
         } else {
-          content = `指令内容: ${order}`;
+          if (!orderMatched) {
+            content = `<strong class="error">空指令</strong>`;
+          } else {
+            content = `空指令`;
+          }
         }
 
         if (recordInstrument == "XN") {
           sampleInfo.XNOrdered = true;
         }
-      } else {
-        title = `发送空指令至${recordInstrument}`;
       }
+
+      changeInstrLog({
+        instrument: recordInstrument,
+        position: recordPosition,
+        type: recordType,
+        archivingInstruction,
+        order
+      });
       break;
     case "R":
       if (recordInstrument.includes("CT90")) {
@@ -228,29 +258,169 @@ function constructPad(record, nodeCount) {
       } else {
         title = `接收到${recordInstrument}发送的结果`;
       }
+
+      changeInstrLog({
+        instrument: recordInstrument,
+        position: recordPosition,
+        type: recordType
+      });
       break;
   }
 
   // 该标本的最后一条记录
   if (index + 1 == nodeCount) {
+    if (!sampleInfo.passedSIOrBT) {
+      addError(CT_NO_BT);
+    }
+
+    if (!sampleInfo.hasLISInfo) {
+      addError(LIS_NO_INFO);
+
+      const indexOfMessage = sampleInfo.errors.indexOf(LIS_INFO_LATE);
+      if (indexOfMessage >= 0) {
+        sampleInfo.errors.splice(indexOfMessage, 1);
+      }
+    }
+
     if (!sampleInfo.lisOrder) {
-      const errorMessage = LIS_NO_ORDER;
-      sampleInfo.errors.indexOf(errorMessage) == -1 &&
-        sampleInfo.errors.unshift(errorMessage);
+      addError(LIS_NO_ORDER);
 
       const indexOfMessage = sampleInfo.errors.indexOf(LIS_ORDER_LATE);
       if (indexOfMessage >= 0) {
         sampleInfo.errors.splice(indexOfMessage, 1);
       }
     }
-    if (!sampleInfo.passedSIOrBT) {
-      const errorMessage = CT_NO_BT;
-      sampleInfo.errors.indexOf(errorMessage) == -1 &&
-        sampleInfo.errors.push(errorMessage);
-    }
+
+    analyzeInstrLog();
   }
 
   return { title, content };
+}
+
+function compareOrders(instrument, position, order, lisOrder) {
+  const parameters = order.split("+");
+  const lisParameters = lisOrder.split("+");
+
+  const CT90_PARAMETERS = [
+    "CBC",
+    "DIFF",
+    "RET",
+    "PLT-F",
+    "WPC",
+    "SP",
+    "SPDI",
+    "A1C"
+  ];
+  const XN_PARAMETERS = ["CBC", "DIFF", "RET", "PLT-F", "WPC"];
+
+  if (
+    instrument == "CT90" &&
+    position != "C" &&
+    !CT90_PARAMETERS.every(checkOrder)
+  ) {
+    return false;
+  } else if (
+    instrument == "XN" &&
+    !sampleInfo.XNOrdered &&
+    !XN_PARAMETERS.every(checkOrder)
+  ) {
+    return false;
+  }
+
+  return true;
+
+  function checkOrder(parameter) {
+    const lisIncludes = lisParameters.includes(parameter);
+    const labomanIncludes = parameters.includes(parameter);
+    return (
+      (!lisIncludes && !labomanIncludes) || (lisIncludes && labomanIncludes)
+    );
+  }
+}
+
+function addInstrLog(instrument, position) {
+  sampleInfo.instrLogs.push({ instrument, position });
+}
+
+function changeInstrLog(info) {
+  var { instrument, position, type, archivingInstruction, order } = info;
+  var matchedLog = sampleInfo.instrLogs
+    .filter(function filterInstr(log) {
+      if (type == "R" && instrument == "CT90") {
+        position = "SI";
+      }
+      return log.instrument == instrument && log.position == position;
+    })
+    .slice(-1)[0];
+  if (matchedLog) {
+    if (type == "O") {
+      if (archivingInstruction) {
+        matchedLog.archivingOrdered = true;
+      }
+      if (!order) {
+        matchedLog.emptyOrder = true;
+      }
+      matchedLog.ordered = true;
+    } else {
+      if (matchedLog.archivingOrdered) {
+        matchedLog.archivingResult = true;
+      }
+      matchedLog.result = true;
+    }
+  }
+}
+
+function analyzeInstrLog() {
+  const noOrderLogs = sampleInfo.instrLogs.filter(function filterNoOrderLogs(
+    log
+  ) {
+    return !log.ordered;
+  });
+  const noResultLogs = sampleInfo.instrLogs.filter(function filterNoOrderLogs(
+    log
+  ) {
+    return (
+      log.instrument != "CT90" &&
+      log.instrument != "SP-10" &&
+      log.ordered &&
+      !log.emptyOrder &&
+      !log.result
+    );
+  });
+  const noArchivingResult = sampleInfo.instrLogs.some(
+    function checkArchivingResult(log) {
+      return log.archivingOrdered && !log.archivingResult;
+    }
+  );
+
+  noOrderLogs.forEach(function addNoOrderError(log) {
+    const { instrument, position } = log;
+    const errorMessage = `Laboman未回复${instrument}指令`;
+    addError(errorMessage);
+  });
+  noResultLogs.forEach(function addNoOrderError(log) {
+    const { instrument } = log;
+    const errorMessage = `Laboman未收到${instrument}的结果`;
+    addError(errorMessage);
+  });
+  if (noArchivingResult) {
+    const errorMessage = `Laboman未收到归档结果`;
+    addError(errorMessage);
+  }
+}
+
+function addError(errorMessage) {
+  var func = Array.prototype.push;
+  if (
+    errorMessage == CT_NO_BT ||
+    errorMessage == LIS_NO_ORDER ||
+    errorMessage == LIS_NO_INFO
+  ) {
+    func = Array.prototype.unshift;
+  }
+
+  !sampleInfo.errors.includes(errorMessage) &&
+    func.call(sampleInfo.errors, errorMessage);
 }
 
 export { parseSampleProcess };

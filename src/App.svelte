@@ -17,11 +17,16 @@
   function searchSampleProcess(index) {
     var { sampleda: sampleDate, sampleno: sampleID } = $samples[index];
     sampleDate = `${sampleDate.split(" ")[0]}%`;
-    conn.exec(
-      "SELECT * FROM sample_process WHERE record_time LIKE ? AND sampleno = ? ORDER BY record_time",
-      [sampleDate, sampleID],
-      handleSearchProcess
-    );
+
+    if (production) {
+      conn.exec(
+        "SELECT * FROM sample_process WHERE record_time LIKE ? AND sampleno = ? ORDER BY record_time",
+        [sampleDate, sampleID],
+        handleSearchProcess
+      );
+    } else {
+      searchSampleProcessByID(sampleID);
+    }
   }
 
   function searchSample(sampleID) {
@@ -35,13 +40,24 @@
           } else {
             samples.set(result);
             searched.set(true);
-            if (result.length == 0) {
+            if ($samples.length == 0) {
               searchSampleProcessByID(sampleID);
             }
           }
         }
       );
     } else {
+      const testSamples = [
+        {
+          sampleda: new Date().toLocaleDateString("zh-CN"),
+          sampleno: "1"
+        },
+        {
+          sampleda: new Date().toLocaleDateString("zh-CN"),
+          sampleno: "2"
+        }
+      ];
+      samples.set(testSamples);
       searched.set(true);
       searchSampleProcessByID(sampleID);
     }
