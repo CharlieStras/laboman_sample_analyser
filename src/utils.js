@@ -48,14 +48,16 @@ function parseNode(node, index, nodes) {
     sampleInfo.tubePosition = record.tubePosition;
   }
 
+  const [orderContent] = order.split("^");
+
   if (record.recordType == "0") {
-    sampleInfo.lisOrder = record.order;
+    sampleInfo.lisOrder = record.orderContent;
   }
 
   [
     record.recordInstrument,
     record.recordPosition,
-    record.recordUnitNO
+    record.recordUnitNO,
   ] = record.recordSource.split("^");
 
   if (record.archivingResult) {
@@ -68,7 +70,7 @@ function parseNode(node, index, nodes) {
         record.trayNO,
         ,
         ,
-        record.positionInRack
+        record.positionInRack,
       ] = archivingInfos;
     }
   }
@@ -92,7 +94,7 @@ function getIconName(record) {
   const {
     recordInstrument: instrument,
     recordPosition: position,
-    recordType
+    recordType,
   } = record;
 
   if (position == "SI" || position == "SO") {
@@ -150,19 +152,22 @@ function constructPad(record, nodeCount) {
     trayNO,
     positionInRack,
     archivingReason,
-    index
+    index,
   } = record;
 
   switch (recordType) {
     case "0":
       title = `接收到LIS发送的指令`;
       {
+        const [orderContent, orderType] = order.split("^");
         const regex = RegExp(/^\+?([0-9a-zA-Z]+)?(\+[0-9a-zA-Z]+)*\+?$/);
-        if (!regex.test(order)) {
+        if (!regex.test(orderContent)) {
           addError(LIS_ORDER_FORMAT_ERROR);
-          content = `指令内容: <strong class="error">${order}</strong>`;
+          content = `指令内容: <strong class="error">${orderContent}</strong>`;
         } else {
-          content = `指令内容: ${order}`;
+          content = `指令内容: ${orderContent}<br>指令类型：${
+            orderType == "L" ? "LIS指令" : "共享指令"
+          }`;
         }
       }
       break;
@@ -247,7 +252,7 @@ function constructPad(record, nodeCount) {
         position: recordPosition,
         type: recordType,
         archivingInstruction,
-        order
+        order,
       });
       break;
     case "R":
@@ -262,7 +267,7 @@ function constructPad(record, nodeCount) {
       changeInstrLog({
         instrument: recordInstrument,
         position: recordPosition,
-        type: recordType
+        type: recordType,
       });
       break;
   }
@@ -309,7 +314,7 @@ function compareOrders(instrument, position, order, lisOrder) {
     "WPC",
     "SP",
     "SPDI",
-    "A1C"
+    "A1C",
   ];
   const XN_PARAMETERS = ["CBC", "DIFF", "RET", "PLT-F", "WPC"];
 
