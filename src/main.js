@@ -7,7 +7,7 @@ var conn_params = require("./secret");
 const conn = sqlanywhere.createConnection();
 
 if (conn_params && process.env.NODE_ENV != "development") {
-  conn.connect(conn_params, function(err) {
+  conn.connect(conn_params, function (err) {
     if (err) console.error(err);
   });
 }
@@ -26,7 +26,7 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 600
+    height: 600,
   });
 
   var watcher;
@@ -44,7 +44,7 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, "../public/index.html"));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on("closed", () => {

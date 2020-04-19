@@ -1,12 +1,13 @@
 <script>
-  import { onMount } from "svelte";
+  import { afterUpdate } from "svelte";
   import { processes, samples } from "./store.js";
 
   export var searchSampleProcess;
 
   var active = true;
 
-  onMount(function selectTheFirstSample() {
+  afterUpdate(() => {
+    console.dir($samples);
     if ($samples.length > 0) {
       // 找第一个标本的流程
       searchSampleProcess(0);
@@ -35,83 +36,6 @@
     active = false;
   }
 </script>
-
-<svelte:window on:click="{handleWindowClick}"></svelte:window>
-{#if $samples && $samples.length > 1}
-<section>
-  <div
-    class="icon"
-    class:hidden="{active}"
-    on:click|stopPropagation="{handleIconClick}"
-  >
-    <svg
-      version="1.1"
-      xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      x="0px"
-      y="0px"
-      viewBox="0 0 512 512"
-    >
-      <g>
-        <g>
-          <path
-            d="M18.822,389.655C8.427,389.655,0,398.082,0,408.477v60.522c0,10.395,8.427,18.822,18.822,18.822h216.601v-98.166H18.822z"
-          />
-        </g>
-      </g>
-      <g>
-        <g>
-          <path
-            d="M493.178,389.655H276.937v98.166h216.241c10.395,0,18.822-8.427,18.822-18.822v-60.522
-			C512,398.081,503.573,389.655,493.178,389.655z"
-          />
-        </g>
-      </g>
-      <g>
-        <g>
-          <path
-            d="M493.178,249.99H276.937v98.151h216.241c10.395,0,18.822-8.427,18.822-18.822v-60.507
-			C512,258.417,503.573,249.99,493.178,249.99z"
-          />
-        </g>
-      </g>
-      <g>
-        <g>
-          <path
-            d="M18.822,249.99C8.427,249.99,0,258.417,0,268.812v60.507c0,10.395,8.427,18.822,18.822,18.822h216.601V249.99H18.822z"
-          />
-        </g>
-      </g>
-      <g>
-        <g>
-          <path
-            d="M493.178,24.179c-15.745,0-451.226,0-474.356,0C8.427,24.179,0,32.606,0,43.001v143.082
-			c0,10.395,8.427,18.822,18.822,18.822c20.684,0,453.555,0,474.356,0c10.395,0,18.822-8.427,18.822-18.822V43.001
-			C512,32.606,503.573,24.179,493.178,24.179z"
-          />
-        </g>
-      </g>
-    </svg>
-  </div>
-
-  <table class:active>
-    <thead>
-      <tr>
-        <th>日期</th>
-        <th>标本号</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each $samples as {sampleda, sampleno}, index (sampleda + sampleno)}
-      <tr on:click|stopPropagation="{handleClick}" data-index="{index}">
-        <td>{transformSampleDate(sampleda)}</td>
-        <td>{sampleno}</td>
-      </tr>
-      {/each}
-    </tbody>
-  </table>
-</section>
-{/if}
 
 <style>
   section {
@@ -197,3 +121,73 @@
     color: #555;
   }
 </style>
+
+<svelte:window on:click={handleWindowClick} />
+{#if $samples && $samples.length > 1}
+  <section>
+    <div
+      class="icon"
+      class:hidden={active}
+      on:click|stopPropagation={handleIconClick}>
+      <svg
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        viewBox="0 0 512 512">
+        <g>
+          <g>
+            <path
+              d="M18.822,389.655C8.427,389.655,0,398.082,0,408.477v60.522c0,10.395,8.427,18.822,18.822,18.822h216.601v-98.166H18.822z" />
+          </g>
+        </g>
+        <g>
+          <g>
+            <path
+              d="M493.178,389.655H276.937v98.166h216.241c10.395,0,18.822-8.427,18.822-18.822v-60.522
+              C512,398.081,503.573,389.655,493.178,389.655z" />
+          </g>
+        </g>
+        <g>
+          <g>
+            <path
+              d="M493.178,249.99H276.937v98.151h216.241c10.395,0,18.822-8.427,18.822-18.822v-60.507
+              C512,258.417,503.573,249.99,493.178,249.99z" />
+          </g>
+        </g>
+        <g>
+          <g>
+            <path
+              d="M18.822,249.99C8.427,249.99,0,258.417,0,268.812v60.507c0,10.395,8.427,18.822,18.822,18.822h216.601V249.99H18.822z" />
+          </g>
+        </g>
+        <g>
+          <g>
+            <path
+              d="M493.178,24.179c-15.745,0-451.226,0-474.356,0C8.427,24.179,0,32.606,0,43.001v143.082
+              c0,10.395,8.427,18.822,18.822,18.822c20.684,0,453.555,0,474.356,0c10.395,0,18.822-8.427,18.822-18.822V43.001
+              C512,32.606,503.573,24.179,493.178,24.179z" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <table class:active>
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>标本号</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each $samples as { sampleda, sampleno }, index (sampleda + sampleno)}
+          <tr on:click|stopPropagation={handleClick} data-index={index}>
+            <td>{transformSampleDate(sampleda)}</td>
+            <td>{sampleno}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
+{/if}

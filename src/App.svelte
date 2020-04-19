@@ -91,18 +91,6 @@
   }
 </script>
 
-<main class:searched="{$searched}">
-  {#if !$searched}
-  <h1>Laboman标本流程查询工具</h1>
-  {/if}
-  <SearchBar {searchSample}></SearchBar>
-  <SampleTable {searchSampleProcess}></SampleTable>
-  {#if $processes.length > 0}
-  <SampleInfo></SampleInfo>
-  <VerticalTimeline processes="{$processes}"></VerticalTimeline>
-  {/if}
-</main>
-
 <style>
   main {
     display: flex;
@@ -127,3 +115,15 @@
     text-align: center;
   }
 </style>
+
+<main class:searched={$searched}>
+  {#if !$searched}
+    <h1>Laboman标本流程查询工具</h1>
+  {/if}
+  <SearchBar {searchSample} />
+  <SampleTable {searchSampleProcess} />
+  {#if $processes.length > 0}
+    <SampleInfo />
+    <VerticalTimeline processes={$processes} />
+  {/if}
+</main>

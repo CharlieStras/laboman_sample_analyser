@@ -48,10 +48,10 @@ function parseNode(node, index, nodes) {
     sampleInfo.tubePosition = record.tubePosition;
   }
 
-  const [orderContent] = order.split("^");
+  const [orderContent] = record.order.split("^");
 
   if (record.recordType == "0") {
-    sampleInfo.lisOrder = record.orderContent;
+    sampleInfo.lisOrder = orderContent;
   }
 
   [
@@ -214,12 +214,13 @@ function constructPad(record, nodeCount) {
         title = `发送指令至${recordInstrument}`;
 
         var orderMatched = true;
+        const { orderContent, orderType } = order.split("^");
 
         if (sampleInfo.lisOrder) {
           orderMatched = compareOrders(
             recordInstrument,
             recordPosition,
-            order,
+            orderContent,
             sampleInfo.lisOrder
           );
 
@@ -228,11 +229,17 @@ function constructPad(record, nodeCount) {
           }
         }
 
-        if (order) {
+        if (orderContent) {
+          const orderTypeText =
+            orderType == "D"
+              ? "<br>指令类型: 默认指令"
+              : orderType == "E"
+              ? "<br>指令类型: 默认管架指令"
+              : "";
           if (!orderMatched) {
-            content = `指令内容: <strong class="error">${order}</strong>`;
+            content = `指令内容: <strong class="error">${orderContent}</strong>${orderTypeText}`;
           } else {
-            content = `指令内容: ${order}`;
+            content = `指令内容: ${orderContent}${orderTypeText}`;
           }
         } else {
           if (!orderMatched) {
