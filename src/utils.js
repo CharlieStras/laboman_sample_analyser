@@ -12,7 +12,7 @@ const LAB_ORDER_ERROR = "Laboman所下指令与LIS指令不符";
 function parseSampleProcess(data) {
   sampleInfo = { lisOrder: "", instrLogs: [], errors: [] };
 
-  var processes = data.map(parseNode);
+  var processes = data.filter((x) => x.record_type != "X").map(parseNode);
 
   return { processes, sampleInfo };
 }
@@ -22,18 +22,19 @@ function parseNode(node, index, nodes) {
   var record = {};
   const nodeCount = nodes.length;
 
-  record.recordTime = node.record_time;
-  record.sampleID = node.sampleno;
-  record.recordSource = node.record_source;
-  record.serialNO = node.serialno;
-  record.recordType = node.record_type;
-  record.rackID = node.rack;
-  record.tubePosition = node.tube;
-  record.order = node.item.toUpperCase();
-  record.archivingInstruction = node.area;
-  record.archivingResult = node.store;
-  record.lisNO = node.lisno;
-  record.archivingReason = node.sort_reason;
+  record.recordTime = node.record_time ?? "";
+  record.sampleID = node.sampleno ?? "";
+  record.recordSource = node.record_source ?? "";
+  record.serialNO = node.serialno ?? "";
+  record.recordType = node.record_type ?? "";
+  record.rackID = node.rack ?? "";
+  record.tubePosition = node.tube ?? "";
+  record.order = node.item == null ? "" : node.item.toUpperCase();
+  record.order = record.order.replace(/^\+/, "").replace(/\+$/, "");
+  record.archivingInstruction = node.area ?? "";
+  record.archivingResult = node.store ?? "";
+  record.lisNO = node.lisno ?? "";
+  record.archivingReason = node.sort_reason ?? "";
   record.index = index;
 
   if (record.sampleID && !sampleInfo.sampleID) {
@@ -214,7 +215,7 @@ function constructPad(record, nodeCount) {
         title = `发送指令至${recordInstrument}`;
 
         var orderMatched = true;
-        const { orderContent, orderType } = order.split("^");
+        const [orderContent, orderType] = order.split("^");
 
         if (sampleInfo.lisOrder) {
           orderMatched = compareOrders(

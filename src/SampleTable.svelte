@@ -7,7 +7,6 @@
   var active = true;
 
   afterUpdate(() => {
-    console.dir($samples);
     if ($samples.length > 0) {
       // 找第一个标本的流程
       searchSampleProcess(0);
