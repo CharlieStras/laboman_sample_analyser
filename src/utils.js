@@ -213,9 +213,22 @@ function constructPad(record, nodeCount) {
 
       break;
     case "O":
+      let timeDiff;
+      if (recordInstrument == "CT90") {
+        let inqueryTime = sampleInfo.ctTimer.pop();
+        if (inqueryTime) {
+          inqueryTime = new Date(inqueryTime);
+          const orderTime = new Date(recordTime);
+          timeDiff = Math.floor((orderTime - inqueryTime) / 1000);
+        }
+      }
+
       if (archivingInstruction) {
         title = `发送归档指令至${recordInstrument}`;
         content = `归档区域: ${archivingInstruction}`;
+        if (timeDiff != null) {
+          content += `<br>指令耗时: ${timeDiff}秒`;
+        }
       } else {
         title = `发送指令至${recordInstrument}`;
 
@@ -257,6 +270,16 @@ function constructPad(record, nodeCount) {
 
         if (recordInstrument == "XN") {
           sampleInfo.XNOrdered = true;
+        }
+
+        if (recordInstrument == "CT90" && timeDiff != null) {
+          content += `<br>指令耗时: ${
+            timeDiff < 1
+              ? "小于1"
+              : timeDiff >= 15
+              ? '<strong class="error">' + timeDiff + "</strong>"
+              : timeDiff
+          }秒`;
         }
       }
 
