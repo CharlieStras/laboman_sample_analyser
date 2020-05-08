@@ -10,7 +10,7 @@ const CT_NO_BT = "标本未经过BT或TS-10";
 const LAB_ORDER_ERROR = "Laboman所下指令与LIS指令不符";
 
 function parseSampleProcess(data) {
-  sampleInfo = { lisOrder: "", instrLogs: [], errors: [] };
+  sampleInfo = { lisOrder: "", instrLogs: [], errors: [], ctTimer: [] };
 
   var processes = data.filter((x) => x.record_type != "X").map(parseNode);
 
@@ -143,6 +143,7 @@ function constructPad(record, nodeCount) {
 
   const {
     recordType,
+    recordTime,
     recordInstrument,
     recordPosition,
     serialNO,
@@ -189,6 +190,10 @@ function constructPad(record, nodeCount) {
       title = `接收到${recordInstrument}${
         serialNO ? "(" + serialNO + ")" : ""
       }发送的指令询问`;
+
+      if (recordInstrument == "CT90") {
+        sampleInfo.ctTimer.push(recordTime);
+      }
 
       if (
         recordInstrument == "CT90" &&
